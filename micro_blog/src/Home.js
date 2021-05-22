@@ -3,12 +3,13 @@ import BlogList from './BlogList';
 
 const Home = () => {
   const [blogs, setBlogs] = useState(null);
+  const [isPending, setIsPending] = useState(true);
 
-  const [name, setName] = useState('Mia');
+  // const [name, setName] = useState('Mia');
 
-  const handleNameChange = () => {
-    setName('Goose');
-  };
+  // const handleNameChange = () => {
+  //   setName('Goose');
+  // };
 
   // Runs on every render
   // useEffect(() => {
@@ -19,23 +20,31 @@ const Home = () => {
   useEffect(() => {
     fetch('http://localhost:8000/blogs')
       .then((res) => {
+        if (!res.ok) {
+          throw Error('Could not fetch the data');
+        }
         return res.json();
       })
       .then((data) => {
         setBlogs(data);
+        setIsPending(false);
+      })
+      .catch((err) => {
+        console.log(err.message);
       });
   }, []);
 
-  // Runs on first render
-  useEffect(() => {
-    console.log('First render or name change.');
-  }, [name]);
+  // // Runs on first render
+  // useEffect(() => {
+  //   console.log('First render or name change.');
+  // }, [name]);
 
   return (
     <div className='home'>
+      {isPending && <div>Loading...</div>}
       {blogs && <BlogList blogs={blogs} />}
-      <button onClick={handleNameChange}>Change Name</button>
-      <p>{name}</p>
+      {/* <button onClick={handleNameChange}>Change Name</button>
+      <p>{name}</p> */}
     </div>
   );
 };
