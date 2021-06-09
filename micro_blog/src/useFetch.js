@@ -8,19 +8,17 @@ const useFetch = (url) => {
   useEffect(() => {
     const abortCont = new AbortController(); //Sets up new AbortController
 
-    fetch(url, { signal: abortCont.signal }) //Attaches abortCont to this fetch
-      .then((res) => {
+    (async function () {
+      try {
+        const res = await fetch(url, { signal: abortCont.signal });
         if (!res.ok) {
           throw Error('Could not fetch the data');
         }
-        return res.json();
-      })
-      .then((data) => {
+        const data = await res.json();
         setData(data);
         setIsPending(false);
         setError(null);
-      })
-      .catch((err) => {
+      } catch (err) {
         if (err.name === 'AbortError') {
           //Prevents the error from being thrown if it is an AbortError
           console.log('Fetch Aboarted');
@@ -28,7 +26,30 @@ const useFetch = (url) => {
           setError(err.message);
           setIsPending(false);
         }
-      });
+      }
+    })();
+
+    // fetch(url, { signal: abortCont.signal }) //Attaches abortCont to this fetch
+    //   .then((res) => {
+    //     if (!res.ok) {
+    //       throw Error('Could not fetch the data');
+    //     }
+    //     return res.json();
+    //   })
+    //   .then((data) => {
+    //     setData(data);
+    //     setIsPending(false);
+    //     setError(null);
+    //   })
+    //   .catch((err) => {
+    //     if (err.name === 'AbortError') {
+    //       //Prevents the error from being thrown if it is an AbortError
+    //       console.log('Fetch Aboarted');
+    //     } else {
+    //       setError(err.message);
+    //       setIsPending(false);
+    //     }
+    //   });
 
     return () => abortCont.abort(); //Runs abortCont when the component is unmounted
   }, [url]);
